@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: tonic-worker
+  name: tonic-worker
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: {{ .Values.numberOfWorkers }}
+  selector:
+    matchLabels:
+      app: tonic-worker
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: tonic-worker
+    spec:
+      containers:
+      - env:
+        - name: TONIC_DB_DATABASE
+          value: {{ .Values.tonicdb.dbName }}
+        - name: TONIC_DB_USERNAME
+          value: {{ .Values.tonicdb.user }}
+        - name: TONIC_DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: tonic-db-password
+              key: password
+        - name: TONIC_DB_PORT
+          value: {{quote .Values.tonicdb.port }}
+        - name: TONIC_DB_SSLMODE
+          value: {{ .Values.tonicdb.sslMode }}
+        - name: TONIC_DB_HOST
+          value: {{ .Values.tonicdb.host }}
+#        - name: TONIC_PROCESS_PARALLELISM
+#          value: "1"
+#        - name: TONIC_TABLE_PARALLELISM
+#          value: "1"
+#        - name: TONIC_WRITE_PARALLELISM
+#          value: "2"
+        - name: ENABLE_LOG_COLLECTION
+          value: {{quote .Values.enableLogCollection }}
+        - name: ENVIRONMENT_NAME
+          value: {{ .Values.environmentName }}
+ 
+        {{- if .Values.tonicai }}
+        {{- if .Values.tonicai.worker }}
+        {{- if .Values.tonicai.worker.env}}
+        {{- range $key, $value := .Values.tonicai.worker.env }}
+        - name: {{ $key }}
+          value: {{ $value | quote }}
+        {{- end }}
+        {{- end }}
+        {{- end }}
+        {{- end }}
+        image: quay.io/tonicai/tonic_worker:{{ .Values.tonicVersion }}
+        imagePullPolicy: Always
+        name: tonic-worker
+        ports:
+        - containerPort: 80
+        - containerPort: 443
+        resources:
+          limits:
+            memory: "12Gi"
+          requests:
+            memory: "6Gi"
+            ephemeral-storage: "1Gi"
+        livenessProbe:
+          exec:
+            command:
+            - /bin/bash
+            - -c
+            - ps -ef | grep Allos.Console.dll | grep -v grep
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          exec:
+            command:
+            - /bin/bash
+            - -c
+            - ps -ef | grep Allos.Console.dll | grep -v grep
+          initialDelaySeconds: 10
+          periodSeconds: 10
+      restartPolicy: Always
+      imagePullSecrets:
+      - name: tonicai-build-writer-pull-secret
+      serviceAccountName: {{ template "tonic.serviceAccountName" . }}
+status: {}

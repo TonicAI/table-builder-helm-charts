@@ -1,0 +1,35 @@
+# This value will be provided to you by Tonic and will allow you to authenticate against our private docker repository.
+dockerConfigAuth: <docker-config-auth>
+
+# tonicdb is the postgres database that will hold information about your workspace.
+tonicdb:
+  host: <db-host>
+  port: 5432
+  dbName: tonic
+  user: <user>
+  password: <password>
+  sslMode: Require
+
+tonicai:
+  web_server:
+    env: {}
+    annotations:
+      # This annotation is only required if you are creating an internal facing ELB. Remove this annotation to create public facing ELB.
+      service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+      service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+  worker:
+  # numberOfWorkers will determine how many worker containers are deployed when installing the helm chart.
+    numberOfWorkers: 1
+    env: {}
+
+# enableLogCollection will send errors and general information about generations to Tonic if true. It will not send user data.
+enableLogCollection: false
+environmentName: <company-name>
+
+# You can set this to a specific Tonic version number if you wish to ensure you always get the same version. Otherwise you will always deploy the latest version of Tonic.
+tonicVersion: latest
+
+# Service account for tonic
+serviceAccount:
+  create: true
+  annotations: {}
