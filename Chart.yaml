@@ -1,6 +1,6 @@
 apiVersion: v2
-name: tonic
-description: A Helm chart for Tonic and EKS
+name: table-builder
+description: A Helm chart for Tonic Table Builder and EKS
 type: application
 
 version: "1.0"
