@@ -1,11 +1,11 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: tonic-web-server
+  name: tonic-table-builder
   namespace: {{ .Release.Namespace }}
-{{- if  ((.Values.tonicai).web_server).annotations }}
+{{- if  ((.Values.tableBuilder).web_server).annotations }}
   annotations:
-    {{- toYaml .Values.tonicai.web_server.annotations | nindent 4 }}
+    {{- toYaml .Values.tableBuilder.web_server.annotations | nindent 4 }}
 {{- else }}
   annotations:
     service.beta.kubernetes.io/aws-load-balancer-internal: "true"
@@ -15,7 +15,7 @@ metadata:
 {{- end }}
 
   labels:
-    app: tonic-web-server
+    app: tonic-table-builder
 spec:
   ports:
   - name: "https"
@@ -23,6 +23,6 @@ spec:
     targetPort: 443
   type: LoadBalancer
   selector:
-    app: tonic-web-server
+    app: tonic-table-builder
 status:
   loadBalancer: {}

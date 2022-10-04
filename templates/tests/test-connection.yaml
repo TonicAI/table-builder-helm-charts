@@ -11,5 +11,5 @@ spec:
     - name: wget
       image: busybox
       command: ['wget']
-      args: ['tonic-web-server:443']
+      args: ['tonic-table-builder:443']
   restartPolicy: Never

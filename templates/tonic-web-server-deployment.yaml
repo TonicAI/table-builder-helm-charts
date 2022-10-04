@@ -2,23 +2,23 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: tonic-web-server
-  name: tonic-web-server
+    app: tonic-table-builder
+  name: tonic-table-builder
   namespace: {{ .Release.Namespace }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: tonic-web-server
+      app: tonic-table-builder
   strategy: {}
   template:
     metadata:
       labels:
-        app: tonic-web-server
+        app: tonic-table-builder
     spec:
       containers:
       - env:
-        {{- range $key, $value := .Values.tonicai.web_server.env }}
+        {{- range $key, $value := .Values.tableBuilder.web_server.env }}
         - name: {{ $key }}
           value: {{ $value | quote }}
         {{- end }}
@@ -37,28 +37,26 @@ spec:
           value: {{ .Values.tonicdb.sslMode }}
         - name: TONIC_DB_HOST
           value: {{ .Values.tonicdb.host }}
-        - name: ENABLE_LOG_COLLECTION
-          value: {{quote .Values.enableLogCollection }}
         - name: ENVIRONMENT_NAME
           value: {{ .Values.environmentName }}
-        image: quay.io/tonicai/tonic_web_server:{{ .Values.tonicVersion }}
+        image: quay.io/tonicai/tonic_table_builder:{{ .Values.tableBuilderVersion }}
         imagePullPolicy: Always
-        name: tonic-web-server
+        name: tonic-table-builder
         ports:
         - containerPort: 80
         - containerPort: 443
         resources:
           limits:
-            memory: "3Gi"
+            memory: "12Gi"
           requests:
-            memory: "2Gi"
+            memory: "6Gi"
             ephemeral-storage: "1Gi"
         livenessProbe:
           exec:
             command:
             - /bin/bash
             - -c
-            - ps -ef | grep Allos.Api.dll | grep -v grep
+            - ps -ef | grep tonic_uplight.dll | grep -v grep
           initialDelaySeconds: 10
           periodSeconds: 10
         readinessProbe:
@@ -66,7 +64,7 @@ spec:
             command:
             - /bin/bash
             - -c
-            - ps -ef | grep Allos.Api.dll | grep -v grep
+            - ps -ef | grep tonic_uplight.dll | grep -v grep
           initialDelaySeconds: 10
           periodSeconds: 10
       restartPolicy: Always
